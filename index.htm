@@ -1,0 +1,297 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Side-By-Side</title>
+
+	<script type="text/javascript" src="script/leaflet-src.js"></script>
+	<link rel="stylesheet" href="script/leaflet.css">
+
+	<script type="text/javascript" src="script/L.Icon.Pulse.js"/></script>
+	<link rel="stylesheet" href="script/L.Icon.Pulse.css" />
+
+	<script type="text/javascript" src="script/L.Map.Sync.js"></script>
+
+	<!-- Cluster POINTs -->
+	<link rel="stylesheet" href="script/MarkerCluster.css" />
+	<link rel="stylesheet" href="script/MarkerCluster.Default.css" />
+	<script src="script/leaflet.markercluster-src.js"></script>
+
+
+	<script src="script/countUp.min.js"></script>
+
+	<script type="text/javascript" src="script/1_config.js"></script>
+	<script type="text/javascript" src="script/2_icons.js"></script>
+	<script type="text/javascript" src="script/5_function.js"></script>
+
+
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="script/leaflet.ie.css" />
+	<![endif]-->
+	<style type="text/css">
+
+		html, body {
+			width: 100%; height: 100%; 
+			margin : 0;
+			font-family:'Source Sans Pro', Helvetica, Arial, sans-serif;
+			text-align:center;
+			color:#060606;
+			background-color:#FFF;
+			position:relative;
+		}
+
+		table {
+	            border-collapse: collapse;
+	            width: 100%;
+		}
+        
+		th,
+		td {
+	            padding: 0.25rem;
+	            text-align: left;
+	            border: 1px solid #ccc;
+		}
+        
+		tbody tr:nth-child(odd) {
+	            background: #f0f0ff;
+		}
+
+//		html, body { width: 100%; height: 100%; margin: 0; }
+//		#map1, #map2 { width: 49.5%; height: 100%; }
+		#map1, #map2 { width: 100%; height: 100%; }
+
+		#map1 { float: left; }
+		#map2 { float: right; }
+
+		.counterTaxi { 
+			font-family      :'Source Sans Pro', Helvetica, Arial, sans-serif;
+			font-size        : 30px;
+			line-height      : 90%;
+			position         : absolute;
+			left             : 50px;
+			top              : 10px;
+			z-index          : 1;
+			width            : 80pt; height: 80pt;
+			color            : #fff0ff;
+			text-align       : center;
+//			vertical-align   : text-bottom;
+			background-color : #3366ff;
+		}
+
+		.counterBus { 
+			font-family      :'Source Sans Pro', Helvetica, Arial, sans-serif;
+			font-size        : 30px;
+			line-height      : 90%;
+			position         : absolute;
+			left             : 170px;
+			top              : 10px;
+			z-index          : 1;
+			width            : 80pt; height: 80pt;
+			color            : #fff0ff;
+			text-align       : center;
+//			vertical-align   : text-bottom;
+			background-color : #3366ff;
+		}
+
+	</style>
+
+	<script src="data/geojson/land/geolf_busstops.json"></script>
+	<script src="data/geojson/land/geolf_mrtstation_P.json"></script>
+	<script src="data/geojson/land/geolf_taxistand_list_P.json"></script>
+	<script src="data/geojson/land/geolf_mrt_lines_L.json"></script>
+
+
+	<script src="data/geojson/land/geolf_hospital_P.json"></script>
+
+	<script src="data/geojson/air/geolf_Drone_A.json"></script>
+	<script src="data/geojson/air/geolf_RestrictedAirspace_A.json"></script>
+
+	<script src="data/geojson/land/geolf_dynamic_traffic_lta_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_speed_lta_L.json"></script>
+	<script src="data/geojson/traffic_cam/geolf_SG_TrafficCamera.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_taxi_P.json"></script>
+
+	<script src="data/geojson/land/geolf_dynamic_carparklots_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_carparklots_lta_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_traffic_news_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_traffic_waze_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_PUB_floodsensor_P.json"></script>
+	<script src="data/geojson/land/geolf_dynamic_BCA_P.json"></script>
+
+	<script src="data/geojson/traffic_cam/geolf_SG_FloodCamera.json"></script>
+
+	<script src="data/geojson/air/geolf_dynamic_airtracks_P.json"></script>
+	<script src="data/geojson/sea/geolf_dynamic_seatracks_P.json"></script>
+
+</head>
+
+<body>
+	<table width="100%" height="100%" border="0" bgcolor="#000000">
+	<tr height="80%">
+		<td width="50%">		
+			<div class="counterTaxi">	
+				<br/><span id="taxiCounter">0</span><br/>
+				<font size="-1">	Taxis on road	</font>
+			</div>
+
+			<div class="counterBus">	
+				<br/><span id="busCounter">0</span><br/>
+				<font size="-1">	Buses on time	</font>
+			</div>
+
+			<div id="map1"></div>
+		</td>
+		<td width="50%">		<div id="map2"></div>	</td>
+	</tr>
+	<tr>
+		<td width="50%" bgcolor="#3366ff" style="color:#ffffff; font-size:20px" valign="top">		<b><u> Government </u></b> <br/>	- <b>LTA</b> OneMotoring	</td>
+		<td width="50%" bgcolor="#2B1B17" style="color:#ffffff; font-size:20px" valign="top">		
+			<b><u> Open-source </u></b>	<br/> <b>Government</b> - PUB webcams/sensors, BCA construction <br/>
+			<b>Commercial</b> - Quantum Inventions, Google Traffic <br/>
+			<b>Community-Of-Interests</b> - Waze, FlightRadar24, MarineTraffic
+		</td>
+	</tr>
+	</table>
+
+
+
+<script type="text/javascript">
+	//----------------------------------------------------------------------------
+	// Map Layers
+
+	var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	var osmAttrib='Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+	var lyrOSM = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});
+
+	var clmUrl='http://{s}.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png';
+	var clmAttrib='';
+	var lyrCloudmade = new L.TileLayer(clmUrl, {minZoom: 1, maxZoom: 18, attribution: clmAttrib});
+
+	var stamenTonerUrl='http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png';
+	//var stamenTonerUrl='../data/Stamen_Toner/{z}/{y}/{z}_y{y}_x{x}.png';
+
+	var stamenTonerAttrib='Stamen Color Map';
+	var lyrstamenToner1 = new L.TileLayer(stamenTonerUrl, {minZoom: 1, maxZoom: 17});
+	var lyrstamenToner2 = new L.TileLayer(stamenTonerUrl, {minZoom: 1, maxZoom: 17});
+
+	var map1 = L.map('map1', {
+		layers      : [lyrstamenToner1],
+		zoomControl : true,
+	});
+	map1.attributionControl.setPrefix('');
+
+	var map2 = L.map('map2', {	
+		layers      : [lyrstamenToner2],
+		zoomControl : true,
+	});
+
+
+		//---------------------------------------------------------------------------
+		// whereto.SG - overlay
+		var wheretoUrl       = '';
+		if (localMapTile) {
+			wheretoUrl       = urlLocal + 'wheretoSG/{z}/{y}/{z}_y{y}_x{x}.png';
+		}
+		else {
+			wheretoUrl       = 'http://arcgis-whereto-1649028446.ap-southeast-1.elb.amazonaws.com/arcgis/rest/services/WhereTo/BaseMap/MapServer/tile/{z}/{y}/{x}';
+		}
+		var wheretoAttrib    = '';
+		var lyrWhereTo = new L.TileLayer(wheretoUrl, {minZoom: 1, maxZoom: 18, attribution: wheretoAttrib});
+	</script>
+
+	<script type="text/javascript" src="script/4_overlays_lta.js"></script>
+	<script type="text/javascript" src="script/4_overlays_opensource.js"></script>
+
+<script type="text/javascript">
+	//----------------------------------------------------------------------------
+	// Map Controls
+	var baseMaps1 = {  
+					"Base Map"    : lyrstamenToner1,
+				};
+
+	var overlayMaps1 = {
+					"Traffic (LTA)"        : lyrgeoTrafficLTA,
+					"Traffic Speed (LTA)"  : lyrLTATraffic,
+// 					"Traffic Speed (LTA)"  : lyrgeoSpeedLTA_L,
+					"Traffic Cameras"      : lyrTrafficCam,
+					"Carpark Lot (LTA)"    : groupCarparkLotLTA_P,
+					"Taxis (LTA)"          : groupTaxiDynamic_P,
+					"Static - Bus Stops"   : groupBusStop_P,
+					"Static - Train Lines" : groupTrain, 
+					"Static - Taxi Stands" : groupTaxi_P,
+				};
+	var controlLayers1 = L.control.layers(baseMaps1, overlayMaps1, {collapsed: false});
+	map1.addControl(controlLayers1);
+
+	var baseMaps2 = {  
+					"Base Map"	: lyrstamenToner2,
+				};
+
+	var overlayMaps2 = {
+					"Traffic (Waze, QI)"       	 : groupTrafficNews, 
+					"Traffic (Waze, QI)"         : groupTrafficNews, 
+					"Traffic Speed (QI)"	     : lyrQITraffic,
+					"Traffic Speed (Google)"     : lyrgmTraffic,
+					"Cameras (PUB / Polyclinic)" : groupCameras,
+					"Carpark Lot (HDB)"	   	     : groupCarparkLot_P,
+					"Flood Sensors (PUB)"        : groupPUB_FloodSensor_P,
+					"BCA Activity"	             : groupBCA_P,
+					"Air (FlightRadar24)"        : groupAirDynamic_P,
+					"Restricted Airspace"        : groupRestrictedAirspace,
+					"Sea (MarineTraffic)"        : groupSeaDynamic_P,
+					"Basemap - SCS"              : lyrMapSCS,
+// 					"Videos (Youtube)"	   : groupVideos,
+
+				};
+	var controlLayers2 = L.control.layers(baseMaps2, overlayMaps2, {collapsed: false});
+	map2.addControl(controlLayers2);
+
+	//----------------------------------------------------------------------------
+	map1.setView(new L.LatLng(1.36233, 103.80109), 11);
+	map2.setView(new L.LatLng(1.36233, 103.80109), 11);
+
+	//----------------------------------------------------------------------------
+	map1.sync(map2);
+	map2.sync(map1);
+
+
+	var demoTaxiCounter, demoBusCounter;
+	// create instance
+	window.onload = function() {
+
+		var options = {
+			useEasing : true,
+			useGrouping : true,
+			separator : ',',
+			decimal : '.',
+			prefix : '',
+			suffix : ''
+		};
+
+		demoTaxiCounter = new CountUp('taxiCounter', 0, 5010, 0, 2.5, options);
+		demoTaxiCounter.start();
+		setInterval(function(){ updateTaxis(); }, 120000);
+
+		demoBusCounter = new CountUp('busCounter', 0, 250, 0, 2.5, options);
+		demoBusCounter.start();
+		setInterval(function(){ updateBuses(); }, 120000);
+
+	}
+
+	function updateTaxis() {
+		var num = randomIntFromInterval(4032, 7500);
+		demoTaxiCounter.update(num);
+	}
+
+	function updateBuses() {
+		var num = randomIntFromInterval(350, 500);
+		demoBusCounter.update(num);
+	}
+
+	function randomIntFromInterval(min,max) {
+		return Math.floor(Math.random()*(max-min+1)+min);
+	}
+
+    </script>
+</body>
+</html>
